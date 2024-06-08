@@ -1,0 +1,42 @@
+name: Deploy to ECS
+
+  on:
+    push:
+      branches:
+        - main
+  
+  jobs:
+    deploy:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v2
+  
+        - name: Set up Docker Buildx
+          uses: docker/setup-buildx-action@v1
+  
+        - name: Log in to Amazon ECR
+          id: login-ecr
+          uses: aws-actions/amazon-ecr-login@v1
+          with:
+            region: ${{ secrets.us-west-2 }}
+            access-key-id: ${{ secrets.AKIAYORRFDZBJKGOBZOP }}
+            secret-access-key: ${{ secrets.8TxHpQripZnK5sh59rJu91xvPe8BeRxedKzQa2x6 }}
+  
+        - name: Build, tag, and push Docker image
+          env:
+            ECR_REPOSITORY: ${{ secrets.580997422658.dkr.ecr.us-west-2.amazonaws.com/hello-world-repo }}
+            AWS_REGION: ${{ secrets.us-west-2 }}
+            AWS_ACCOUNT_ID: ${{ secrets.5809-9742-2658 }}
+          run: |
+            IMAGE_TAG=latest
+            aws ecr get-login-password --region $us-west-2 | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
+            docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
+            docker tag $ECR_REPOSITORY:$IMAGE_TAG ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:$IMAGE_TAG
+            docker push ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:$IMAGE_TAG
+  
+        - name: Deploy to ECS
+          env:
+            AWS_REGION: ${{ secrets.us-west-2 }}
+          run: |
+            aws ecs update-service --cluster hello-world-cluster --service hello-world-service --force-new-deployment --region $AWS_REGION
