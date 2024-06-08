@@ -19,14 +19,14 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
         with:
-          region: ${{ secrets.AWS_REGION }}
+          region: ${{ secrets.us-west-2 }}
           access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - name: Build, tag, and push Docker image
         env:
           ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_REGION: ${{ secrets.us-west-2 }}
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
         run: |
           IMAGE_TAG=latest
@@ -37,7 +37,7 @@ jobs:
 
       - name: Deploy to ECS
         env:
-          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_REGION: ${{ secrets.us-west-2 }}
         run: |
           aws ecs update-service --cluster hello-world-cluster --service hello-world-service --force-new-deployment --region $AWS_REGION
 
