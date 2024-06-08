@@ -20,12 +20,12 @@
           uses: aws-actions/amazon-ecr-login@v1
           with:
             region: ${{ secrets.us-west-2 }}
-            access-key-id: ${{ secrets.AKIAYORRFDZBJKGOBZOP }}
-            secret-access-key: ${{ secrets.8TxHpQripZnK5sh59rJu91xvPe8BeRxedKzQa2x6 }}
+            access-key-id: ${{ secrets.'AKIAYORRFDZBJKGOBZOP' }}
+            secret-access-key: ${{ secrets.'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' }}
   
         - name: Build, tag, and push Docker image
           env:
-            ECR_REPOSITORY: ${{ secrets.580997422658.dkr.ecr.us-west-2.amazonaws.com/hello-world-repo }}
+            ECR_REPOSITORY: ${{ secrets.'580997422658.dkr.ecr.us-west-2.amazonaws.com/hello-world-repo' }}
             AWS_REGION: ${{ secrets.us-west-2 }}
             AWS_ACCOUNT_ID: ${{ secrets.5809-9742-2658 }}
           run: |
