@@ -1,7 +1,29 @@
 provider "aws" {
-  region = "us-west-2" # Update with your preferred region
-  access_key = "AKIAYORRFDZBJKGOBZOP"
-  secret_key = "8TxHpQripZnK5sh59rJu91xvPe8BeRxedKzQa2x6"
+  region = "us-west-2"
+  access_key = "AKIAYORRFDZBJJVKZBFK"
+  secret_key = "aWd2VDIOwl4CuaOD69kWBBp09LzbMh6CuTS2Nt5D"
+}
+
+resource "aws_iam_role" "ecs_task_execution" {
+  name = "ecsTaskExecutionRole"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action = "sts:AssumeRole",
+        Effect = "Allow",
+        Principal = {
+          Service = "ecs-tasks.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_task_execution" {
+  role       = aws_iam_role.ecs_task_execution.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
 resource "aws_vpc" "main" {
@@ -67,6 +89,7 @@ resource "aws_ecs_task_definition" "hello_world" {
   network_mode             = "awsvpc"
   cpu                      = "256"
   memory                   = "512"
+  execution_role_arn       = aws_iam_role.ecs_task_execution.arn
 
   container_definitions = jsonencode([{
     name      = "hello-world"
