@@ -44,3 +44,4 @@ jobs:
           SERVICE_NAME: ${{ secrets.SERVICE_NAME }}
         run: |
           aws ecs update-service --cluster $CLUSTER_NAME --service $SERVICE_NAME --force-new-deployment --region $AWS_REGION
+
