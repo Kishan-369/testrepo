@@ -26,7 +26,7 @@ jobs:
         env:
           ECR_REPOSITORY: your-ecr-repository
           AWS_REGION: "us-east-1"
-          AWS_ACCOUNT_ID: 580997422658
+          AWS_ACCOUNT_ID: 5809-9742-2658
           ECR_REGISTRY: 580997422658.dkr.ecr.us-west-2.amazonaws.com
         run: |
           IMAGE_TAG=latest
