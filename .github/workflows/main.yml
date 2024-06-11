@@ -16,11 +16,11 @@ jobs:
 
       - name: Log in to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2  # Updated to Node.js 20 compatible version
-        with:
-          access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          region: "us-east-1"  # Ensure this is defined in your secrets
+        uses: aws-actions/amazon-ecr-login@v2  # Using environment variables for credentials
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: "us-east-1"
 
       - name: Build, tag, and push Docker image
         env:
@@ -42,3 +42,4 @@ jobs:
           SERVICE_NAME: ${{ secrets.SERVICE_NAME }}
         run: |
           aws ecs update-service --cluster $CLUSTER_NAME --service $SERVICE_NAME --force-new-deployment --region $AWS_REGION
+
