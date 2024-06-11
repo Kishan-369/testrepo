@@ -20,7 +20,7 @@ jobs:
         with:
           access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          region: ${{ secrets.AWS_REGION }}  # Ensure this is defined in your secrets
+          region: "us-east-1"  # Ensure this is defined in your secrets
 
       - name: Build, tag, and push Docker image
         env:
