@@ -38,8 +38,8 @@ jobs:
       - name: Deploy to ECS
         env:
           AWS_REGION: "us-east-1"
-          CLUSTER_NAME: ${{ secrets.CLUSTER_NAME }}
-          SERVICE_NAME: ${{ secrets.SERVICE_NAME }}
+          CLUSTER_NAME: hello-world-cluster
+          SERVICE_NAME: hello-world-service
         run: |
           aws ecs update-service --cluster $CLUSTER_NAME --service $SERVICE_NAME --force-new-deployment --region $AWS_REGION
 
