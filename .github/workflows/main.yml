@@ -1,43 +1,61 @@
-name: Deploy to AWS ECS
+name: Deploy to Amazon ECS
 
 on:
   push:
     branches:
       - main
 
+env:
+  AWS_REGION: us-west-1
+  ECR_REPOSITORY: my-ecr-repo
+  ECS_SERVICE: my-ecs-service
+  ECS_CLUSTER: my-ecs-cluster
+  ECS_TASK_DEFINITION: .aws/task-definition.json
+  CONTAINER_NAME: my-container-name
+
 jobs:
   deploy:
+    name: Deploy
     runs-on: ubuntu-latest
+    environment: production
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Configure AWS credentials using OIDC
-        uses: aws-actions/configure-aws-credentials@v3
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@0e613a0980cbf65ed5b322eb7a1e075d28913a83
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          external-id: ${{ secrets.AWS_EXTERNAL_ID }}
-          role-duration-seconds: 1200  # Optional, adjust as needed
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
-      - name: Log in to Amazon ECR
+      - name: Login to Amazon ECR
         id: login-ecr
-        run: aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_REGISTRY_URL }}
+        uses: aws-actions/amazon-ecr-login@62f4f872db3836360b72999f4b87f1ff13310f3a
 
-      - name: Build, tag, and push Docker image
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
         env:
-          ECR_REPOSITORY: your-ecr-repository
-          IMAGE_TAG: latest
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
-          docker tag $ECR_REPOSITORY:$IMAGE_TAG ${{ secrets.AWS_ECR_REGISTRY_URL }}/$ECR_REPOSITORY:$IMAGE_TAG
-          docker push ${{ secrets.AWS_ECR_REGISTRY_URL }}/$ECR_REPOSITORY:$IMAGE_TAG
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-      - name: Deploy to ECS
-        uses: aws-actions/amazon-ecs-deploy-task@v2
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@c804dfbdd57f713b6c079302a4c01db7017a36fc
         with:
-          cluster: hello-world-cluster
-          service: hello-world-service
-          task-definition: hello-world-taskdefination
-          container-image-name: ${{ secrets.AWS_ECR_REGISTRY_URL }}/$ECR_REPOSITORY:$IMAGE_TAG
+          task-definition: ${{ env.ECS_TASK_DEFINITION }}
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ steps.build-image.outputs.image }}
+
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@df9643053eda01f169e64a0e60233aacca83799a
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
+
