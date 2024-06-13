@@ -1,3 +1,5 @@
+name: Deploy to AWS ECS
+
 on:
   push:
     branches:
@@ -9,37 +11,33 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4  # Updated to Node.js 20 compatible version
+        uses: actions/checkout@v2
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2  # Updated to Node.js 20 compatible version
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          external-id: ${{ secrets.AWS_EXTERNAL_ID }}
+          role-duration-seconds: 1200  # Optional, adjust as needed
 
       - name: Log in to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2  # Using environment variables for credentials
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: "us-east-1"
+        run: aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_REGISTRY_URL }}
 
       - name: Build, tag, and push Docker image
         env:
           ECR_REPOSITORY: your-ecr-repository
-          AWS_REGION: "us-east-1"
-          AWS_ACCOUNT_ID: 5809-9742-2658
-          ECR_REGISTRY: 580997422658.dkr.ecr.us-west-2.amazonaws.com
+          IMAGE_TAG: latest
         run: |
-          IMAGE_TAG=latest
-          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
           docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
-          docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker tag $ECR_REPOSITORY:$IMAGE_TAG ${{ secrets.AWS_ECR_REGISTRY_URL }}/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push ${{ secrets.AWS_ECR_REGISTRY_URL }}/$ECR_REPOSITORY:$IMAGE_TAG
 
       - name: Deploy to ECS
-        env:
-          AWS_REGION: "us-east-1"
-          CLUSTER_NAME: hello-world-cluster
-          SERVICE_NAME: hello-world-service
-        run: |
-          aws ecs update-service --cluster $CLUSTER_NAME --service $SERVICE_NAME --force-new-deployment --region $AWS_REGION
-
+        uses: aws-actions/amazon-ecs-deploy-task@v2
+        with:
+          cluster: hello-world-cluster
+          service: hello-world-service
+          task-definition: hello-world-taskdefination
+          container-image-name: ${{ secrets.AWS_ECR_REGISTRY_URL }}/$ECR_REPOSITORY:$IMAGE_TAG
+          wait-for-service-stability: true
