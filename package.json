@@ -1,5 +1,5 @@
 {
-  "name": "hello-world-app",
+  "name": "hello-world",
   "version": "1.0.0",
   "description": "Hello World Node.js app",
   "main": "app.js",
@@ -10,3 +10,4 @@
     "express": "^4.17.1"
   }
 }
+
