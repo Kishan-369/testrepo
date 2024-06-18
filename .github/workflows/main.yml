@@ -33,9 +33,6 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
           REPOSITORY: hello-world-repo
         run: |
-          # Build a docker container and
-          # push it to ECR so that it can
-          # be deployed to ECS.
           docker build -t $ECR_REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$REPOSITORY:$IMAGE_TAG
           echo "image=$ECR_REGISTRY/$REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT    
@@ -44,9 +41,9 @@ jobs:
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: hello-world-task:4
+          task-definition: task-definitions/hello-world-task.json  # Local task definition file
           container-name: hello-world
-          image: ${{ steps.build-image.outputs.image }}    
+          image: ${{ steps.build-image.outputs.image }}
 
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
@@ -54,4 +51,5 @@ jobs:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           service: hello-world-service
           cluster: hello-world-cluster
-          wait-for-service-stability: true  
+          wait-for-service-stability: true
+

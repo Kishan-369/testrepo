@@ -1,12 +1,11 @@
 {
   "family": "hello-world-task",
-  "networkMode": "awsvpc",
   "containerDefinitions": [
     {
       "name": "hello-world",
       "image": "580997422658.dkr.ecr.us-west-1.amazonaws.com/hello-world-repo:latest",
       "essential": true,
-      "memory": 256,
+      "memory": 512,
       "cpu": 256,
       "portMappings": [
         {
@@ -19,7 +18,10 @@
   "requiresCompatibilities": [
     "FARGATE"
   ],
-  "cpu": "256",
+  "networkMode": "awsvpc",
   "memory": "512",
-  "executionRoleArn": "arn:aws:iam::580997422658:role/ecsTaskExecutionRole"
+  "cpu": "256",
+  "executionRoleArn": "arn:aws:iam::YOUR_ACCOUNT_ID:role/YOUR_EXECUTION_ROLE",
+  "taskRoleArn": "arn:aws:iam::YOUR_ACCOUNT_ID:role/YOUR_TASK_ROLE"
 }
+
