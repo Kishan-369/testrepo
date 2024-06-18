@@ -1,4 +1,4 @@
-name: Deploy to Amazon ECS
+name: Deploy to Amazon EC
 
 on:
   push:
@@ -52,4 +52,3 @@ jobs:
           service: hello-world-service
           cluster: hello-world-cluster
           wait-for-service-stability: true
-
