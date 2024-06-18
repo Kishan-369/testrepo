@@ -23,9 +23,8 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
-
-      - name: List files for debugging
-        run: ls -la
+        with:
+          mask-password: 'true'
 
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
@@ -34,7 +33,9 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
           REPOSITORY: hello-world-repo
         run: |
-          # Adjust this line if your Dockerfile is not in the root directory
+          # Build a docker container and
+          # push it to ECR so that it can
+          # be deployed to ECS.
           docker build -t $ECR_REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$REPOSITORY:$IMAGE_TAG
           echo "image=$ECR_REGISTRY/$REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT    
