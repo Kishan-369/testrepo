@@ -3,6 +3,10 @@ variable "aws_region" {
   default     = "us-west-1"
 }
 
+variable "aws_account_id" {
+  description = "AWS Account ID"
+}
+
 variable "ecr_repository_name" {
   description = "ECR repository name"
   default     = "hello-world-repo"
