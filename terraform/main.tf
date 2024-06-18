@@ -1,7 +1,7 @@
 provider "aws" {
   region = "us-west-1"
-  access_key = 
-  secret_key = 
+  access_key = "AKIAYORRFDZBFFL7RWXO"
+  secret_key = "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"
 }
 
 resource "aws_vpc" "main" {
@@ -55,12 +55,16 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_policy" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
-resource "aws_ecs_cluster" "main" {
-  name = "hello-world-cluster"
+resource "aws_ecr_repository" "hello_world_repo" {
+  name = var.ecr_repository_name
 }
 
-resource "aws_ecs_task_definition" "hello_world" {
-  family                   = "hello-world"
+resource "aws_ecs_cluster" "main" {
+  name = var.ecs_cluster_name
+}
+
+resource "aws_ecs_task_definition" "hello_world_task" {
+  family                   = var.task_definition_name
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = "256"
@@ -69,8 +73,8 @@ resource "aws_ecs_task_definition" "hello_world" {
 
   container_definitions = jsonencode([
     {
-      name  = "hello-world"
-      image = "${aws_account_id}.dkr.ecr.${var.region}.amazonaws.com/${var.ecr_repository}:latest"
+      name      = "hello-world"
+      image     = "$580997422658.dkr.ecr.${var.aws_region}.amazonaws.com/${var.ecr_repository_name}:latest"
       essential = true
 
       portMappings = [
@@ -83,10 +87,10 @@ resource "aws_ecs_task_definition" "hello_world" {
   ])
 }
 
-resource "aws_ecs_service" "hello_world" {
-  name            = "hello-world-service"
+resource "aws_ecs_service" "hello_world_service" {
+  name            = var.ecs_service_name
   cluster         = aws_ecs_cluster.main.id
-  task_definition = aws_ecs_task_definition.hello_world.arn
+  task_definition = aws_ecs_task_definition.hello_world_task.arn
   desired_count   = 1
   launch_type     = "FARGATE"
 
@@ -97,8 +101,4 @@ resource "aws_ecs_service" "hello_world" {
 }
 
 data "aws_availability_zones" "available" {}
-
-resource "aws_ecr_repository" "hello_world_repo" {
-  name = "hello-world-repo"
-}
 

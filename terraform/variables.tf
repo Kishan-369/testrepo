@@ -1,4 +1,24 @@
-variable "ecr_image" {
-  description = "580997422658.dkr.ecr.us-west-2.amazonaws.com/hello-world-repo:latest"
-  type        = string
+variable "aws_region" {
+  description = "AWS region"
+  default     = "us-west-1"
+}
+
+variable "ecr_repository_name" {
+  description = "ECR repository name"
+  default     = "hello-world-repo"
+}
+
+variable "ecs_cluster_name" {
+  description = "ECS Cluster name"
+  default     = "hello-world-cluster"
+}
+
+variable "ecs_service_name" {
+  description = "ECS Service name"
+  default     = "hello-world-service"
+}
+
+variable "task_definition_name" {
+  description = "Task Definition name"
+  default     = "hello-world-task"
 }
