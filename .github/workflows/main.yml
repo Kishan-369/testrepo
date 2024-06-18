@@ -41,7 +41,7 @@ jobs:
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: task-definitions/hello-world-task.json  # Local task definition file
+          task-definition: task-definitions/hello-world-task.json
           container-name: hello-world
           image: ${{ steps.build-image.outputs.image }}
 
